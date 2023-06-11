@@ -4,7 +4,12 @@
   "plugins": ["prettier"],
   "parserOptions": { "ecmaVersion": 2020, "sourceType": "module" },
   "rules": {
-    "prettier/prettier": "error",
+    "prettier/prettier": [
+      "error",
+      {
+        "endOfLine": "auto"
+      }
+    ],
     "no-console": "off",
     "camelcase": "off",
     "func-names": "off",

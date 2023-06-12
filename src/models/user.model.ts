@@ -33,6 +33,22 @@ const userSchema: Schema<IUser> = new mongoose.Schema({
     immutable: true,
     default: () => Date.now(),
   },
+  language: {
+    type: String,
+    lowercase: true,
+    enum: ['en', 'ru', 'he', 'ar'],
+    default: 'he',
+  },
+  // work_group: {
+  //   type: String,
+  //   required: true,
+  //   default: 'a',
+  // },
+  clicks: {
+    type: Map,
+    of: Number,
+    default: new Map(),
+  },
 });
 
 const User = mongoose.model<IUserDocument>('User', userSchema);

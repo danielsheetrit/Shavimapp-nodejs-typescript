@@ -2,7 +2,7 @@
   "name": "shavimapp",
   "version": "1.0.0",
   "description": "",
-  "main": "server.ts",
+  "main": "build/server.js",
   "scripts": {
     "start": "node build/server.js",
     "dev": "nodemon --exec ts-node src/server.ts",
@@ -19,8 +19,7 @@
     "express-async-errors": "^3.1.1",
     "http-terminator": "^3.2.0",
     "jsonwebtoken": "^9.0.0",
-    "mongoose": "^6.2.8",
-    "ts-node": "^10.4.0"
+    "mongoose": "^6.2.8"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.2",

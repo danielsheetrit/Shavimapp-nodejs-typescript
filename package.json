@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node build/server.js",
     "dev": "nodemon --exec ts-node src/server.ts",
-    "build": "tsc",
+    "build": "npm install && tsc",
     "lint": ""
   },
   "author": "danieldev",

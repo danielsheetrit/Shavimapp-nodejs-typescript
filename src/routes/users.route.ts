@@ -5,6 +5,7 @@ import {
   getUserSummary,
   loginEmployee,
   getUserById,
+  handleClick,
 } from '../controllers/users.controller';
 
 const userRouter = Router();
@@ -12,6 +13,7 @@ const userRouter = Router();
 userRouter
   .get('/user-by-id/:id', getUserById)
   .get('/users-summary', getUserSummary)
+  .put('/click', handleClick)
   .post('/login-employee', loginEmployee)
   .post('/register', register)
   .post('/login', login);

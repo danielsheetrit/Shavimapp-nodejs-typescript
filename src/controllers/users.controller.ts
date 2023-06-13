@@ -86,7 +86,7 @@ const login = async (req: Request, res: Response) => {
 
     user.password = '';
 
-    return res.json({ acsessToken, user });
+    res.json({ acsessToken, user });
   } catch (err) {
     return res.status(500).json({ message: 'Failed to login', error: err });
   }
@@ -111,7 +111,8 @@ const loginEmployee = async (req: Request, res: Response) => {
     );
 
     user.password = '';
-    return res.status(200).json({ user, acsessToken });
+
+    res.json({ user, acsessToken });
   } catch (err) {
     return res.status(500).json({ message: 'Failed to login employee' });
   }
@@ -168,4 +169,36 @@ const getUserById = async (req: Request, res: Response) => {
   }
 };
 
-export { register, login, getUserSummary, loginEmployee, getUserById };
+const handleClick = async (req: Request, res: Response) => {
+  const { id } = req.body;
+
+  const currentDate = new Date();
+  const formattedDate =
+    ('0' + (currentDate.getMonth() + 1)).slice(-2) +
+    ('0' + currentDate.getDate()).slice(-2) +
+    currentDate.getFullYear();
+
+  try {
+    // Increment the value in the map or set it to 1 if it doesn't exist yet
+    const result = await User.findByIdAndUpdate(
+      id,
+      { $inc: { ['clicks.' + formattedDate]: 1 } },
+      { new: true, upsert: true }
+    );
+
+    res.json({ date: result });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ message: 'Failed to get handle click', error: err });
+  }
+};
+
+export {
+  register,
+  login,
+  getUserSummary,
+  loginEmployee,
+  getUserById,
+  handleClick,
+};

@@ -39,11 +39,20 @@ const userSchema: Schema<IUser> = new mongoose.Schema({
     enum: ['en', 'ru', 'he', 'ar'],
     default: 'he',
   },
-  // work_group: {
-  //   type: String,
-  //   required: true,
-  //   default: 'a',
-  // },
+  work_group: {
+    type: Number,
+    required: true,
+    default: 1,
+    enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+  },
+  avatar: {
+    type: Buffer,
+    default: '',
+  },
+  connected: {
+    type: Boolean,
+    default: false,
+  },
   clicks: {
     type: Map,
     of: Number,

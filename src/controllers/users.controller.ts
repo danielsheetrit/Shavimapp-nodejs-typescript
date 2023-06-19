@@ -2,20 +2,26 @@ import 'dotenv/config';
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import sharp from 'sharp';
 
 import { mongoose } from '../db/mongoose';
 import { IUser } from '../interfaces/IUser';
 import { User } from '../models/user.model';
 import { isEmpty } from '../utils';
 
+interface TokenPayload {
+  _id: string;
+}
+
 const register = async (req: Request, res: Response) => {
+  console.log('req.body', req.body);
   const {
     username,
     first_name,
     last_name,
     user_type,
     password,
-    language, // default to hebrew (he)
+    work_group, // default to hebrew (he)
   }: IUser = req.body;
 
   if (isEmpty([username, first_name, last_name, user_type, password])) {
@@ -38,13 +44,19 @@ const register = async (req: Request, res: Response) => {
   const hashedPw = await bcrypt.hash(password, 8);
 
   try {
+    const buffer = await sharp(req?.file?.buffer)
+      .resize({ width: 500, height: 500 })
+      .png()
+      .toBuffer();
+
     const user = new User({
       username,
       first_name,
       last_name,
       user_type,
       password: hashedPw,
-      language: language ? language.toLowerCase() : 'he',
+      work_group,
+      avatar: buffer,
     });
 
     await user.save();
@@ -58,6 +70,7 @@ const login = async (req: Request, res: Response) => {
   const { username, password } = req.body;
 
   if (isEmpty([username, password])) {
+    console.error('One or more of the fields are empty');
     return res
       .status(400)
       .json({ message: 'One or more of the fields are empty' });
@@ -67,16 +80,44 @@ const login = async (req: Request, res: Response) => {
     const user = await User.findOne({ username });
 
     if (!user) {
+      console.error('Invalid Username');
       return res.status(400).json({ message: 'Invalid Username or Password' });
+    }
+
+    const connectedUser = await User.findOne({ connected: true });
+
+    // user connected is true and forigen user wants to connect
+    if (connectedUser && connectedUser?.username !== username) {
+      return res.status(403).json({
+        message: `Unfortunately we can’t log you in, there is a user ${connectedUser?.username} already
+        logged in to the system.`,
+      });
+    }
+
+    if (user.user_type === 'user') {
+      return res.status(400).json({ message: 'Invalid User type' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid Password' });
+      console.error('Invalid Password');
+      return res.status(401).json({ message: 'Invalid Username or Password' });
     }
 
-    const acsessToken = jwt.sign(
+    const updatedUser = await User.findByIdAndUpdate(
+      user._id,
+      { connected: true },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res
+        .status(404)
+        .send({ message: 'Failed to update user connected status' });
+    }
+
+    const accessToken = jwt.sign(
       {
         _id: user.id.toString(),
         exp: Math.floor(Date.now() / 1000) + 60 * 60 * 8, // 8h experation
@@ -86,7 +127,7 @@ const login = async (req: Request, res: Response) => {
 
     user.password = '';
 
-    res.json({ acsessToken, user });
+    res.json({ accessToken, user });
   } catch (err) {
     return res.status(500).json({ message: 'Failed to login', error: err });
   }
@@ -102,7 +143,25 @@ const loginEmployee = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Invalid Username or Password' });
     }
 
-    const acsessToken = jwt.sign(
+    if (user.connected) {
+      return res
+        .status(403)
+        .json({ message: 'You are already connected from another device' });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      user._id,
+      { connected: true },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res
+        .status(404)
+        .send({ message: 'Failed to update user connected status' });
+    }
+
+    const accessToken = jwt.sign(
       {
         _id: user.id.toString(),
         exp: Math.floor(Date.now() / 1000) + 60 * 60 * 8, // 8h experation
@@ -112,7 +171,7 @@ const loginEmployee = async (req: Request, res: Response) => {
 
     user.password = '';
 
-    res.json({ user, acsessToken });
+    res.json({ user, accessToken });
   } catch (err) {
     return res.status(500).json({ message: 'Failed to login employee' });
   }
@@ -132,6 +191,8 @@ const getUserSummary = async (req: Request, res: Response) => {
         $project: {
           _id: 1,
           username: 1,
+          work_group: 1,
+          avatar: 1,
         },
       },
     ]);
@@ -143,10 +204,21 @@ const getUserSummary = async (req: Request, res: Response) => {
   }
 };
 
-const getUserById = async (req: Request, res: Response) => {
-  const { id } = req.params;
+const getUserWithToken = async (req: Request, res: Response) => {
+  const headerValue: string | undefined = req.header('Authorization');
+
+  if (!headerValue) {
+    return res.status(400).json({ message: 'Authorization Header missing' });
+  }
+
+  const token = headerValue.replace('Bearer ', '');
 
   try {
+    const { _id: id } = jwt.verify(
+      token,
+      process.env.JWT_SECRET as string
+    ) as TokenPayload;
+
     const user = await User.aggregate([
       {
         $match: {
@@ -194,11 +266,49 @@ const handleClick = async (req: Request, res: Response) => {
   }
 };
 
+const logout = async (req: Request, res: Response) => {
+  const headerValue: string | undefined = req.header('Authorization');
+
+  if (!headerValue) {
+    return res.status(400).json({ message: 'Authorization Header missing' });
+  }
+
+  const token = headerValue.replace('Bearer ', '');
+  try {
+    const { _id } = jwt.verify(
+      token,
+      process.env.JWT_SECRET as string
+    ) as TokenPayload;
+
+    const user = await User.findByIdAndUpdate(
+      _id,
+      { connected: false },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).send({ message: 'No user found with this id' });
+    }
+
+    return res.status(200).send({
+      message: 'User status successfully updated to disconnected',
+    });
+  } catch (err) {
+    if (err instanceof Error) {
+      return res.status(500).send({
+        message: 'An error occurred while updating the user connected status',
+        error: err.message,
+      });
+    }
+  }
+};
+
 export {
   register,
   login,
   getUserSummary,
   loginEmployee,
-  getUserById,
+  getUserWithToken,
   handleClick,
+  logout,
 };

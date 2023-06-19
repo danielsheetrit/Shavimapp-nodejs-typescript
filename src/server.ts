@@ -6,6 +6,7 @@ import cors from 'cors';
 
 import './db/mongoose';
 import userRouter from './routes/users.route';
+import eventRouter from './routes/events.route';
 
 const app: Application = express();
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3030;
@@ -16,6 +17,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.use('/users', userRouter);
+app.use('/events', eventRouter);
 
 export const server = http.createServer(app);
 export const httpTerminator = createHttpTerminator({

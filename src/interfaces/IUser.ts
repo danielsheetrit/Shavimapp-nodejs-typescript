@@ -7,7 +7,9 @@ export interface IUser extends Document {
   user_type: 'user' | 'admin' | 'chief';
   created_at: Date;
   password: string;
-  // work_group: 'a' | 'b' | 'c';
+  work_group: number;
+  connected: boolean;
+  avatar: Buffer | string;
   language: 'en' | 'ru' | 'he' | 'ar';
   clicks: Map<string, number>;
 }

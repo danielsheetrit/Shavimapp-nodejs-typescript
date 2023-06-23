@@ -9,6 +9,7 @@ import {
   getUserWithToken,
   handleClick,
   logout,
+  handleBreak,
 } from '../controllers/users.controller';
 
 const userRouter = Router();
@@ -16,6 +17,7 @@ const userRouter = Router();
 userRouter
   .get('/users-summary', getUserSummary)
   .get('/user-with-token', getUserWithToken)
+  .put('/break', handleBreak)
   .put('/logout', logout)
   .put('/click', handleClick)
   .post('/login-employee', loginEmployee)

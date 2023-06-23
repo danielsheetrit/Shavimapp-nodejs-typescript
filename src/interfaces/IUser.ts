@@ -1,5 +1,9 @@
 import { Document } from '../db/mongoose';
 
+export type Click = {
+  updatedAt: Date;
+  count: number;
+};
 export interface IUser extends Document {
   username: string;
   first_name: string;
@@ -10,8 +14,10 @@ export interface IUser extends Document {
   work_group: number;
   connected: boolean;
   avatar: Buffer | string;
+  onBreak: boolean;
   language: 'en' | 'ru' | 'he' | 'ar';
-  clicks: Map<string, number>;
+  clicks: Map<string, Click>;
+  breaks: Map<string, number>;
 }
 
 export interface IUserDocument extends IUser, Document {}

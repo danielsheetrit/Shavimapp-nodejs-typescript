@@ -1,5 +1,5 @@
 import { mongoose, Schema } from '../db/mongoose';
-import { IUser, IUserDocument } from '../interfaces/IUser';
+import { IUser, IUserDocument, Click } from '../interfaces/IUser';
 
 const userSchema: Schema<IUser> = new mongoose.Schema({
   username: {
@@ -53,9 +53,21 @@ const userSchema: Schema<IUser> = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  clicks: {
+  onBreak: {
+    type: Boolean,
+    default: false,
+  },
+  breaks: {
     type: Map,
     of: Number,
+    default: new Map(),
+  },
+  clicks: {
+    type: Map,
+    of: {
+      updatedAt: Date,
+      count: Number,
+    },
     default: new Map(),
   },
 });

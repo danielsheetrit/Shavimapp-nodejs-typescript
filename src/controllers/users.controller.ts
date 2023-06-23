@@ -7,14 +7,17 @@ import sharp from 'sharp';
 import { mongoose } from '../db/mongoose';
 import { IUser } from '../interfaces/IUser';
 import { User } from '../models/user.model';
-import { isEmpty } from '../utils';
+import { Settings } from '../models/settings.model';
+import { isEmpty, todayFormattedDate } from '../utils';
+
+import { socketIo } from '../server';
+import { eventEmiters } from '../socketHandlers/eventNames';
 
 interface TokenPayload {
   _id: string;
 }
 
 const register = async (req: Request, res: Response) => {
-  console.log('req.body', req.body);
   const {
     username,
     first_name,
@@ -84,12 +87,16 @@ const login = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Invalid Username or Password' });
     }
 
-    const connectedUser = await User.findOne({ connected: true });
+    const connectedUser = await User.findOne({
+      connected: true,
+      user_type: 'admin',
+    });
 
     // user connected is true and forigen user wants to connect
     if (connectedUser && connectedUser?.username !== username) {
+      console.error('Admin already connected');
       return res.status(403).json({
-        message: `Unfortunately we can’t log you in, there is a user ${connectedUser?.username} already
+        message: `Unfortunately we can’t log you in, there is a Admin/Chief ${connectedUser?.username} already
         logged in to the system.`,
       });
     }
@@ -103,18 +110,6 @@ const login = async (req: Request, res: Response) => {
     if (!isMatch) {
       console.error('Invalid Password');
       return res.status(401).json({ message: 'Invalid Username or Password' });
-    }
-
-    const updatedUser = await User.findByIdAndUpdate(
-      user._id,
-      { connected: true },
-      { new: true }
-    );
-
-    if (!updatedUser) {
-      return res
-        .status(404)
-        .send({ message: 'Failed to update user connected status' });
     }
 
     const accessToken = jwt.sign(
@@ -244,25 +239,62 @@ const getUserWithToken = async (req: Request, res: Response) => {
 const handleClick = async (req: Request, res: Response) => {
   const { id } = req.body;
 
-  const currentDate = new Date();
-  const formattedDate =
-    ('0' + (currentDate.getMonth() + 1)).slice(-2) +
-    ('0' + currentDate.getDate()).slice(-2) +
-    currentDate.getFullYear();
+  const todayDate = todayFormattedDate();
 
   try {
-    // Increment the value in the map or set it to 1 if it doesn't exist yet
-    const result = await User.findByIdAndUpdate(
-      id,
-      { $inc: { ['clicks.' + formattedDate]: 1 } },
-      { new: true, upsert: true }
-    );
+    const user = await User.findById(id);
 
-    res.json({ date: result });
+    if (user?.onBreak) {
+      return res
+        .status(403)
+        .json({ message: 'User on break cannot increment' });
+    }
+
+    // Get the click record for the current date
+    const clickRecord = user?.clicks.get(todayDate);
+
+    // Check if 3 minutes have passed since the last click
+    const settings = await Settings.findOne({});
+
+    if (settings) {
+      const timeSinceLastClick =
+        Date.now() - new Date(clickRecord?.updatedAt || 0).getTime();
+
+      const timeDidntPassed =
+        timeSinceLastClick < settings?.min_count_time * (60 * 1000);
+
+      console.log(timeSinceLastClick, settings?.min_count_time * (60 * 1000));
+
+      if (timeDidntPassed) {
+        return res.status(403).json({
+          message: `Less than ${settings?.min_count_time} minutes since last click`,
+        });
+      }
+    }
+
+    // Increment the value in the map or set it to 1 if it doesn't exist yet
+    const updatedClicks = user?.clicks;
+    if (clickRecord) {
+      clickRecord.count += 1;
+      clickRecord.updatedAt = new Date();
+      updatedClicks?.set(todayDate, clickRecord);
+    } else {
+      updatedClicks?.set(todayDate, { updatedAt: new Date(), count: 1 });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      { clicks: updatedClicks },
+      { new: true }
+    );
+    const newCount = updatedUser?.clicks.get(todayDate);
+
+    socketIo.emit(eventEmiters.COUNTER_INCREMENT);
+    return res.json({ count: newCount?.count });
   } catch (err) {
     return res
       .status(500)
-      .json({ message: 'Failed to get handle click', error: err });
+      .json({ message: 'Failed to handle click', error: err });
   }
 };
 
@@ -303,9 +335,31 @@ const logout = async (req: Request, res: Response) => {
   }
 };
 
+const handleBreak = async (req: Request, res: Response) => {
+  const { id, isBreak } = req.body;
+
+  try {
+    await User.findByIdAndUpdate(id, { onBreak: isBreak });
+
+    if (isBreak) {
+      socketIo.emit(eventEmiters.USER_IN_BREAK, { userId: id });
+    } else {
+      socketIo.emit(eventEmiters.USER_CAME_FROM_BREAK, { userId: id });
+    }
+
+    console.log(`[Break]: ${isBreak}`);
+    return res.status(200).json({});
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ message: 'Failed to get handle click', error: err });
+  }
+};
+
 export {
   register,
   login,
+  handleBreak,
   getUserSummary,
   loginEmployee,
   getUserWithToken,

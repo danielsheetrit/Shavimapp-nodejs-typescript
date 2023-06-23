@@ -20,7 +20,7 @@ import { eventListeners } from './socketHandlers/eventNames';
 const app: Application = express();
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3030;
 
-app.use(cors({ origin: process.env.CLIENT_URL }));
+app.use(cors({ origin: '*' }));
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -37,7 +37,7 @@ export const httpTerminator = createHttpTerminator({
 // sockets
 export const socketIo = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL,
+    origin: '*',
   },
 });
 

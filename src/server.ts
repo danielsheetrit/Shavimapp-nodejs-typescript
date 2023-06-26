@@ -12,6 +12,7 @@ import './db/mongoose';
 import userRouter from './routes/users.route';
 import eventRouter from './routes/events.route';
 import actionsRouter from './routes/actions.route';
+import settingsRouter from './routes/settings.route';
 
 // socket handlers
 import handleEvents from './socketHandlers/main.handler';
@@ -28,6 +29,7 @@ app.use(bodyParser.json());
 app.use('/users', userRouter);
 app.use('/events', eventRouter);
 app.use('/actions', actionsRouter);
+app.use('/settings', settingsRouter);
 
 export const server = http.createServer(app);
 export const httpTerminator = createHttpTerminator({

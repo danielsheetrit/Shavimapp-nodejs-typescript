@@ -1,9 +1,16 @@
 import { Router } from 'express';
 
-import { getEventByLanguage } from '../controllers/events.controller';
+import {
+  getEventByLanguage,
+  getEvents,
+  updateEventsByLanguage,
+} from '../controllers/events.controller';
 
 const eventRouter = Router();
 
-eventRouter.get('/event-by-language/:language', getEventByLanguage);
+eventRouter
+  .get('/', getEvents)
+  .get('/event-by-language/:language', getEventByLanguage)
+  .put('/', updateEventsByLanguage);
 
 export default eventRouter;

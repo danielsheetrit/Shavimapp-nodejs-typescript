@@ -25,21 +25,22 @@ const validateBreak = async (req: Request, res: Response) => {
     const user = await User.findById(id);
 
     if (user?.onBreak) {
+      console.log('[Break]: Starts validating break');
       // Check if "todayDate" key exists in the breaks map
       const todayDate = todayFormattedDate();
       const breakCount = user.breaks.get(todayDate) || 0;
 
       // Increment the "todayDate" count or set it to 1 if it does not exist
-      const newUser = await User.findOneAndUpdate(
+      await User.findOneAndUpdate(
         { _id: id },
-        { $set: { ['breaks.' + todayDate]: breakCount + 1 } },
-        { new: true } // Return the updated document
+        { $set: { ['breaks.' + todayDate]: breakCount + 1 } }
       );
 
-      return res.json({ user: newUser });
+      socketIo.emit(eventEmiters.USER_IN_BREAK, { userId: id });
+      return res.json({});
     }
 
-    return res.json({ user: null });
+    return res.json({});
   } catch (err) {
     return res
       .status(500)

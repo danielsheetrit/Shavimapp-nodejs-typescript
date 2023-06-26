@@ -48,7 +48,7 @@ const register = async (req: Request, res: Response) => {
 
   try {
     const buffer = await sharp(req?.file?.buffer)
-      .resize({ width: 500, height: 500 })
+      .resize({ width: 100, height: 100 })
       .png()
       .toBuffer();
 
@@ -263,8 +263,6 @@ const handleClick = async (req: Request, res: Response) => {
       const timeDidntPassed =
         timeSinceLastClick < settings?.min_count_time * (60 * 1000);
 
-      console.log(timeSinceLastClick, settings?.min_count_time * (60 * 1000));
-
       if (timeDidntPassed) {
         return res.status(403).json({
           message: `Less than ${settings?.min_count_time} minutes since last click`,
@@ -341,9 +339,7 @@ const handleBreak = async (req: Request, res: Response) => {
   try {
     await User.findByIdAndUpdate(id, { onBreak: isBreak });
 
-    if (isBreak) {
-      socketIo.emit(eventEmiters.USER_IN_BREAK, { userId: id });
-    } else {
+    if (!isBreak) {
       socketIo.emit(eventEmiters.USER_CAME_FROM_BREAK, { userId: id });
     }
 

@@ -17,6 +17,17 @@ const getSettings = async (req: Request, res: Response) => {
 const updateSettings = async (req: Request, res: Response) => {
   const { settings } = req.body;
   try {
+    // logic to fire samplingCycle change event.
+    const currentSettings = await Settings.findOne({});
+
+    if (
+      currentSettings?.sampling_cycle_in_minutes !==
+        settings.sampling_cycle_in_minutes ||
+      currentSettings?.count_ref_per_hour !== settings.count_ref_per_hour
+    ) {
+      socketIo.emit(eventEmiters.DISTRESS_SETTINGS_CHANGED);
+    }
+
     await Settings.findOneAndUpdate(
       {},
       {

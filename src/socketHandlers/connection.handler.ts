@@ -18,6 +18,12 @@ async function handleUserStatus(socket: Socket, status: boolean) {
       throw new Error('Failed to update DB at: activateUserStatus');
     }
 
+    if (status) {
+      await User.findByIdAndUpdate(userId, {
+        last_login: new Date(),
+      });
+    }
+
     console.log(
       `[${status ? 'updated-connected' : 'updated-disconnected'}]: ${socket.id}`
     );

@@ -7,11 +7,7 @@ import sharp from 'sharp';
 import { mongoose } from '../db/mongoose';
 import { IUser } from '../interfaces/IUser';
 import { User } from '../models/user.model';
-import { Settings } from '../models/settings.model';
-import { isEmpty, todayFormattedDate } from '../utils';
-
-import { socketIo } from '../server';
-import { eventEmiters } from '../socketHandlers/eventNames';
+import { formatUser, isEmpty } from '../utils';
 
 interface TokenPayload {
   _id: string;
@@ -24,7 +20,7 @@ const register = async (req: Request, res: Response) => {
     last_name,
     user_type,
     password,
-    work_group, // default to hebrew (he)
+    work_group,
   }: IUser = req.body;
 
   if (isEmpty([username, first_name, last_name, user_type, password])) {
@@ -121,8 +117,8 @@ const login = async (req: Request, res: Response) => {
     );
 
     user.password = '';
-
-    res.json({ accessToken, user });
+    const formattedUser = formatUser(user);
+    res.json({ accessToken, user: formattedUser });
   } catch (err) {
     return res.status(500).json({ message: 'Failed to login', error: err });
   }
@@ -166,7 +162,8 @@ const loginEmployee = async (req: Request, res: Response) => {
 
     user.password = '';
 
-    res.json({ user, accessToken });
+    const formattedUser = formatUser(user);
+    res.json({ user: formattedUser, accessToken });
   } catch (err) {
     return res.status(500).json({ message: 'Failed to login employee' });
   }
@@ -228,71 +225,12 @@ const getUserWithToken = async (req: Request, res: Response) => {
       },
     ]);
 
-    res.json({ user });
+    const formattedUser = formatUser(user[0]);
+    res.json({ user: formattedUser });
   } catch (err) {
     return res
       .status(500)
       .json({ message: 'Failed to get user by id', error: err });
-  }
-};
-
-const handleClick = async (req: Request, res: Response) => {
-  const { id } = req.body;
-
-  const todayDate = todayFormattedDate();
-
-  try {
-    const user = await User.findById(id);
-
-    if (user?.onBreak) {
-      return res
-        .status(403)
-        .json({ message: 'User on break cannot increment' });
-    }
-
-    // Get the click record for the current date
-    const clickRecord = user?.clicks.get(todayDate);
-
-    // Check if 3 minutes have passed since the last click
-    const settings = await Settings.findOne({});
-
-    if (settings) {
-      const timeSinceLastClick =
-        Date.now() - new Date(clickRecord?.updatedAt || 0).getTime();
-
-      const timeDidntPassed =
-        timeSinceLastClick < settings?.min_count_time * (60 * 1000);
-
-      if (timeDidntPassed) {
-        return res.status(403).json({
-          message: `Less than ${settings?.min_count_time} minutes since last click`,
-        });
-      }
-    }
-
-    // Increment the value in the map or set it to 1 if it doesn't exist yet
-    const updatedClicks = user?.clicks;
-    if (clickRecord) {
-      clickRecord.count += 1;
-      clickRecord.updatedAt = new Date();
-      updatedClicks?.set(todayDate, clickRecord);
-    } else {
-      updatedClicks?.set(todayDate, { updatedAt: new Date(), count: 1 });
-    }
-
-    const updatedUser = await User.findByIdAndUpdate(
-      id,
-      { clicks: updatedClicks },
-      { new: true }
-    );
-    const newCount = updatedUser?.clicks.get(todayDate);
-
-    socketIo.emit(eventEmiters.COUNTER_INCREMENT);
-    return res.json({ count: newCount?.count });
-  } catch (err) {
-    return res
-      .status(500)
-      .json({ message: 'Failed to handle click', error: err });
   }
 };
 
@@ -333,32 +271,28 @@ const logout = async (req: Request, res: Response) => {
   }
 };
 
-const handleBreak = async (req: Request, res: Response) => {
-  const { id, isBreak } = req.body;
-
+const getAllUsers = async (req: Request, res: Response) => {
   try {
-    await User.findByIdAndUpdate(id, { onBreak: isBreak });
+    const users = await User.find({});
 
-    if (!isBreak) {
-      socketIo.emit(eventEmiters.USER_CAME_FROM_BREAK, { userId: id });
-    }
+    const newUsers: any[] = [];
+    users.forEach((user) => {
+      const formattedUser = formatUser(user);
+      newUsers.push(formattedUser);
+    });
 
-    console.log(`[Break]: ${isBreak}`);
-    return res.status(200).json({});
+    return res.status(200).json({ users: newUsers });
   } catch (err) {
-    return res
-      .status(500)
-      .json({ message: 'Failed to get handle click', error: err });
+    return res.status(500).json({ message: 'Failed to getUsers', error: err });
   }
 };
 
 export {
   register,
   login,
-  handleBreak,
   getUserSummary,
   loginEmployee,
   getUserWithToken,
-  handleClick,
   logout,
+  getAllUsers,
 };

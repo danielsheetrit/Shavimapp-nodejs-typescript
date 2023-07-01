@@ -1,10 +1,11 @@
 import 'dotenv/config';
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
-mongoose.connect(process.env.MONGO_URI as string).catch((err) => {
-  console.error(`Failed to connect MongoDB: ${err}`);
-});
-mongoose.set('strictQuery', true);
+(async () => {
+  await mongoose.connect(process.env.MONGO_URI as string).catch((err) => {
+    console.error(`Failed to connect MongoDB: ${err}`);
+  });
+})();
 
 // events
 mongoose.connection.on('connected', () => {

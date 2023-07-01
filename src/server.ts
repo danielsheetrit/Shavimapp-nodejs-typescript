@@ -9,10 +9,13 @@ import { Server } from 'socket.io';
 import 'dotenv/config';
 
 import './db/mongoose';
+
 import userRouter from './routes/users.route';
 import eventRouter from './routes/events.route';
 import actionsRouter from './routes/actions.route';
 import settingsRouter from './routes/settings.route';
+import breaksRouter from './routes/breaks.route';
+import clicksRouter from './routes/clicks.route';
 
 // socket handlers
 import handleEvents from './socketHandlers/main.handler';
@@ -30,6 +33,8 @@ app.use('/users', userRouter);
 app.use('/events', eventRouter);
 app.use('/actions', actionsRouter);
 app.use('/settings', settingsRouter);
+app.use('/breaks', breaksRouter);
+app.use('/clicks', clicksRouter);
 
 export const server = http.createServer(app);
 export const httpTerminator = createHttpTerminator({

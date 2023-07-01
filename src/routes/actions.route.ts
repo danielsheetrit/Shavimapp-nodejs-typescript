@@ -1,14 +1,9 @@
 import { Router } from 'express';
 
-import {
-  emitCallForHelp,
-  validateBreak,
-} from '../controllers/actions.controller';
+import { emitCallForHelp } from '../controllers/actions.controller';
 
 const actionsRouter = Router();
 
-actionsRouter
-  .post('/help', emitCallForHelp)
-  .put('/validate-break', validateBreak);
+actionsRouter.post('/help', emitCallForHelp);
 
 export default actionsRouter;

@@ -43,7 +43,7 @@ const userSchema: Schema<IUser> = new mongoose.Schema({
     type: Number,
     required: true,
     default: 1,
-    enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    enum: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
   },
   avatar: {
     type: Buffer,
@@ -57,18 +57,9 @@ const userSchema: Schema<IUser> = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  breaks: {
-    type: Map,
-    of: Number,
-    default: new Map(),
-  },
-  clicks: {
-    type: Map,
-    of: {
-      updatedAt: Date,
-      count: Number,
-    },
-    default: new Map(),
+  last_login: {
+    type: Date,
+    default: () => Date.now(),
   },
 });
 

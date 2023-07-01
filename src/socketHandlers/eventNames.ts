@@ -7,10 +7,13 @@ const CALL_FOR_HELP = 'call-for-help';
 const COUNTER_INCREMENT = 'counter-increment';
 const SETTINGS_UPDATED = 'settings-updated';
 const EVENTS_UPDATED = 'events-updated';
+const DISTRESS_SETTINGS_CHANGED = 'distress-checking-changed';
+const USER_IN_DISTRESS = 'user-in-distress';
 
 export const eventListeners = {
   DISCONNECT,
   CONNECTION,
+  DISTRESS_SETTINGS_CHANGED,
 };
 
 export const eventEmiters = {
@@ -21,4 +24,6 @@ export const eventEmiters = {
   COUNTER_INCREMENT,
   SETTINGS_UPDATED,
   EVENTS_UPDATED,
+  DISTRESS_SETTINGS_CHANGED,
+  USER_IN_DISTRESS,
 };

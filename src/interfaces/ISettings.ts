@@ -1,3 +1,4 @@
+import { Document } from '../db/mongoose';
 export interface ISettings {
   min_break_time: number;
   min_count_time: number;

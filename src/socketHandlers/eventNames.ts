@@ -9,6 +9,7 @@ const SETTINGS_UPDATED = 'settings-updated';
 const EVENTS_UPDATED = 'events-updated';
 const DISTRESS_SETTINGS_CHANGED = 'distress-checking-changed';
 const USER_IN_DISTRESS = 'user-in-distress';
+const QUESTION_CREATED = 'question-created';
 
 export const eventListeners = {
   DISCONNECT,
@@ -26,4 +27,5 @@ export const eventEmiters = {
   EVENTS_UPDATED,
   DISTRESS_SETTINGS_CHANGED,
   USER_IN_DISTRESS,
+  QUESTION_CREATED,
 };

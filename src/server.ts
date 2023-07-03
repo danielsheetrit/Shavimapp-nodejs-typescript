@@ -8,18 +8,22 @@ import { Server } from 'socket.io';
 // dev
 import 'dotenv/config';
 
+// db
 import './db/mongoose';
 
+// routes
 import userRouter from './routes/users.route';
 import eventRouter from './routes/events.route';
 import actionsRouter from './routes/actions.route';
 import settingsRouter from './routes/settings.route';
 import breaksRouter from './routes/breaks.route';
 import clicksRouter from './routes/clicks.route';
+import mediaRouter from './routes/media.route';
 
 // socket handlers
 import handleEvents from './socketHandlers/main.handler';
 import { eventListeners } from './socketHandlers/eventNames';
+import questionRouter from './routes/questions.route';
 
 const app: Application = express();
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3030;
@@ -35,6 +39,8 @@ app.use('/actions', actionsRouter);
 app.use('/settings', settingsRouter);
 app.use('/breaks', breaksRouter);
 app.use('/clicks', clicksRouter);
+app.use('/media', mediaRouter);
+app.use('/question', questionRouter);
 
 export const server = http.createServer(app);
 export const httpTerminator = createHttpTerminator({

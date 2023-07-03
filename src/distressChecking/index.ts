@@ -2,6 +2,7 @@ import { Distress } from '../models/distress.model';
 import { User } from '../models/user.model';
 import { socketIo } from '../server';
 import { eventEmiters } from '../socketHandlers/eventNames';
+import { createQuestion } from '../controllers/utils.controller';
 
 const distressCheck = async (
   sampling_cycle_in_minutes: number,
@@ -129,6 +130,19 @@ const distressCheck = async (
 
     if (isDistress) {
       socketIo.emit(eventEmiters.USER_IN_DISTRESS, { userId: user._id });
+
+      const feelingQuestion = await createQuestion({
+        isSystem: true,
+        sender: '',
+        receiver: user._id,
+        question_type: 'feeling',
+        url: '',
+        text: '',
+      });
+
+      socketIo.emit(eventEmiters.QUESTION_CREATED, {
+        question: feelingQuestion,
+      });
     }
   });
 

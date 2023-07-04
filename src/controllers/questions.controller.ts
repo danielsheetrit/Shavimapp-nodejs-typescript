@@ -8,13 +8,17 @@ import { Question } from '../models/question.model';
 const initiateQuestion = async (req: Request, res: Response) => {
   const { isSystem, sender, receiver, question_type, url, text } = req.body;
 
-  const user = await User.findOne({ id: sender });
-
-  if (user?.onBreak) {
-    throw new Error('Cannot send Question when user on break');
-  }
+  const user = await User.findById(receiver);
 
   try {
+    if (!user?.connected) {
+      throw new Error('Cannot send Question when user not connected');
+    }
+
+    if (user?.onBreak) {
+      throw new Error('Cannot send Question when user on break');
+    }
+
     const question = await createQuestion({
       isSystem,
       sender,
@@ -28,9 +32,10 @@ const initiateQuestion = async (req: Request, res: Response) => {
 
     return res.json(question);
   } catch (err) {
-    return res
-      .status(500)
-      .json({ message: 'Failed to initiateQuestion', error: err });
+    return res.status(500).json({
+      message: err.message || 'Failed to initiateQuestion',
+      error: err,
+    });
   }
 };
 
@@ -45,6 +50,7 @@ const answerQuestion = async (req: Request, res: Response) => {
       }
     );
 
+    socketIo.emit(eventEmiters.QUESTION_ANSWERED);
     res.json({});
   } catch (err) {
     return res

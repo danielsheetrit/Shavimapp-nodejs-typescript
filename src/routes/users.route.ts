@@ -8,13 +8,11 @@ import {
   loginEmployee,
   getUserWithToken,
   logout,
-  getAllUsers,
 } from '../controllers/users.controller';
 
 const userRouter = Router();
 
 userRouter
-  .get('/', getAllUsers)
   .get('/users-summary', getUserSummary)
   .get('/user-with-token', getUserWithToken)
   .put('/logout', logout)

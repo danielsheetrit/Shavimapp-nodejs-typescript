@@ -9,7 +9,7 @@ import {
 
 export default async function handleEvents(socket: Socket) {
   await connectionHandlers.handleUserStatus(socket, true);
-  // startJob();
+  startJob();
 
   socket.on(eventListeners.DISTRESS_SETTINGS_CHANGED, () => {
     restartJob();

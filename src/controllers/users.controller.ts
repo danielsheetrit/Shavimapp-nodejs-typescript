@@ -271,22 +271,6 @@ const logout = async (req: Request, res: Response) => {
   }
 };
 
-const getAllUsers = async (req: Request, res: Response) => {
-  try {
-    const users = await User.find({});
-
-    const newUsers: any[] = [];
-    users.forEach((user) => {
-      const formattedUser = formatUser(user);
-      newUsers.push(formattedUser);
-    });
-
-    return res.status(200).json({ users: newUsers });
-  } catch (err) {
-    return res.status(500).json({ message: 'Failed to getUsers', error: err });
-  }
-};
-
 export {
   register,
   login,
@@ -294,5 +278,4 @@ export {
   loginEmployee,
   getUserWithToken,
   logout,
-  getAllUsers,
 };

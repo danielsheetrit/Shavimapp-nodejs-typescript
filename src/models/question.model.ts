@@ -3,7 +3,8 @@ import { IQuestion, IQuestionDocument } from '../interfaces/IQuestion';
 
 const questionSchema: Schema<IQuestion> = new mongoose.Schema({
   sender: {
-    type: Schema.Types.Mixed,
+    type: Schema.Types.ObjectId,
+    ref: 'User',
   },
   receiver: {
     type: Schema.Types.ObjectId,

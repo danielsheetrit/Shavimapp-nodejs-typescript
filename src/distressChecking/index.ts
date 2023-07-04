@@ -133,7 +133,7 @@ const distressCheck = async (
 
       const feelingQuestion = await createQuestion({
         isSystem: true,
-        sender: '',
+        sender: null,
         receiver: user._id,
         question_type: 'feeling',
         url: '',

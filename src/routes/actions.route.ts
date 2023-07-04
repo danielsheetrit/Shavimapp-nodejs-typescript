@@ -1,9 +1,14 @@
 import { Router } from 'express';
 
-import { emitCallForHelp } from '../controllers/actions.controller';
+import {
+  emitCallForHelp,
+  getAdminDashboard,
+} from '../controllers/actions.controller';
 
 const actionsRouter = Router();
 
-actionsRouter.post('/help', emitCallForHelp);
+actionsRouter
+  .get('/admin-dashboard', getAdminDashboard)
+  .post('/help', emitCallForHelp);
 
 export default actionsRouter;

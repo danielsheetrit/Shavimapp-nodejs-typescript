@@ -18,11 +18,6 @@ const distressCheck = async (
         connected: true,
         onBreak: false,
         user_type: 'user',
-        // last_login: {
-        //   $gte: new Date(
-        //     currentTime - percentOfTheSample * samplingInMilliSeconds
-        //   ),
-        // },
       },
     },
     {

@@ -33,14 +33,17 @@ const updateEventsByLanguage = async (req: Request, res: Response) => {
   const { event } = req.body;
 
   try {
-    await Event.findOneAndUpdate(
+    const doc = await Event.findOneAndUpdate(
       { language: event.language },
       {
         event_list: event.event_list,
+      },
+      {
+        new: true,
       }
     );
     socketIo.emit(eventEmiters.EVENTS_UPDATED);
-    return res.json({});
+    return res.json({ newEvent: doc });
   } catch (err) {
     return res
       .status(500)

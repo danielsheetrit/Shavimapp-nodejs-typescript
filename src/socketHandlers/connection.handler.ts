@@ -1,7 +1,6 @@
 import { Socket } from 'socket.io';
 import { socketIo } from '../server';
 import { User } from '../models/user.model';
-
 import { eventEmiters } from './eventNames';
 
 async function handleUserStatus(socket: Socket, status: boolean) {

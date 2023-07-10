@@ -18,14 +18,17 @@ const emitCallForHelp = async (req: Request, res: Response) => {
 };
 
 const getAdminDashboard = async (req: Request, res: Response) => {
-  const startOfToday = new Date();
-  startOfToday.setHours(0, 0, 0, 0);
+  const milisec = parseInt(req.params.milisec, 10);
+  const workGroup = parseInt(req.params.workGroup, 10);
+  const date = new Date(milisec);
+  const tommarowDate = new Date(new Date(date).setDate(date.getDate() + 1));
 
   try {
     const users = await User.aggregate([
       {
         $match: {
           user_type: 'user',
+          work_group: workGroup,
         },
       },
       {
@@ -38,7 +41,7 @@ const getAdminDashboard = async (req: Request, res: Response) => {
                 $expr: {
                   $and: [
                     { $eq: ['$userId', '$$userId'] },
-                    { $eq: ['$date', startOfToday] },
+                    { $eq: ['$date', date] },
                   ],
                 },
               },
@@ -58,7 +61,7 @@ const getAdminDashboard = async (req: Request, res: Response) => {
                 $expr: {
                   $and: [
                     { $eq: ['$userId', '$$userId'] },
-                    { $eq: ['$date', startOfToday] },
+                    { $eq: ['$date', date] },
                   ],
                 },
               },
@@ -78,7 +81,7 @@ const getAdminDashboard = async (req: Request, res: Response) => {
                 $expr: {
                   $and: [
                     { $eq: ['$userId', '$$userId'] },
-                    { $eq: ['$date', startOfToday] },
+                    { $eq: ['$date', date] },
                   ],
                 },
               },
@@ -91,7 +94,7 @@ const getAdminDashboard = async (req: Request, res: Response) => {
       {
         $lookup: {
           from: 'questions',
-          let: { userId: '$_id', today: startOfToday },
+          let: { userId: '$_id', today: date, tommarowDate },
           pipeline: [
             {
               $match: {
@@ -99,6 +102,8 @@ const getAdminDashboard = async (req: Request, res: Response) => {
                   $and: [
                     { $eq: ['$receiver', '$$userId'] },
                     { $gte: ['$createdAt', '$$today'] },
+                    { $lt: ['$createdAt', '$$tommarowDate'] },
+                    { $ne: ['$answer', ''] },
                   ],
                 },
               },
@@ -140,4 +145,23 @@ const getAdminDashboard = async (req: Request, res: Response) => {
   }
 };
 
-export { emitCallForHelp, getAdminDashboard };
+const getManagementDashboard = async (req: Request, res: Response) => {
+  try {
+    const users = await User.aggregate([
+      {
+        $project: {
+          created_at: 0,
+          password: 0,
+        },
+      },
+    ]);
+
+    res.json(users);
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ message: 'Failed to getManagementDashboard', error: err });
+  }
+};
+
+export { emitCallForHelp, getAdminDashboard, getManagementDashboard };

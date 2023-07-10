@@ -34,6 +34,7 @@ const updateSettings = async (req: Request, res: Response) => {
         ...settings,
       }
     );
+
     socketIo.emit(eventEmiters.SETTINGS_UPDATED);
     return res.json({});
   } catch (err) {

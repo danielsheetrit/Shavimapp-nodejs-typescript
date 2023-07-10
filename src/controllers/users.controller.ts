@@ -248,11 +248,7 @@ const logout = async (req: Request, res: Response) => {
       process.env.JWT_SECRET as string
     ) as TokenPayload;
 
-    const user = await User.findByIdAndUpdate(
-      _id,
-      { connected: false },
-      { new: true }
-    );
+    const user = await User.findByIdAndUpdate(_id, { connected: false });
 
     if (!user) {
       return res.status(404).send({ message: 'No user found with this id' });
@@ -271,6 +267,53 @@ const logout = async (req: Request, res: Response) => {
   }
 };
 
+const deleteUsers = async (req: Request, res: Response) => {
+  const { idsArr } = req.body;
+
+  try {
+    const deleteResult = await User.deleteMany({ _id: { $in: idsArr } });
+    console.log(`${deleteResult.deletedCount} document(s) deleted.`);
+    return res.json({});
+  } catch (err) {
+    return res.status(500).send({
+      message: 'An error occurred while updating the user connected status',
+      error: err.message,
+    });
+  }
+};
+
+const updateUser = async (req: Request, res: Response) => {
+  const { workGroup, language, id } = req.body;
+
+  try {
+    const updateFields: any = {};
+
+    const user = await User.findById(id);
+
+    if (workGroup && user?.user_type === 'user') {
+      updateFields.work_group = workGroup;
+    }
+
+    if (language) {
+      updateFields.language = language;
+    }
+
+    // Update the document by its ID
+    const updatedDocument = await User.findByIdAndUpdate(
+      id,
+      { $set: updateFields },
+      { new: true }
+    );
+
+    return res.json({ updatedDocument });
+  } catch (err) {
+    return res.status(500).send({
+      message: 'An error occurred while updating the user connected status',
+      error: err.message,
+    });
+  }
+};
+
 export {
   register,
   login,
@@ -278,4 +321,6 @@ export {
   loginEmployee,
   getUserWithToken,
   logout,
+  deleteUsers,
+  updateUser,
 };

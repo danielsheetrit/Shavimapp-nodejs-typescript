@@ -8,9 +8,18 @@ import { Question } from '../models/question.model';
 const initiateQuestion = async (req: Request, res: Response) => {
   const { isSystem, sender, receiver, question_type, url, text } = req.body;
 
-  const user = await User.findById(receiver);
-
   try {
+    // admin validation -------------------------------------------
+    const admin = await User.findById(sender);
+
+    if (admin?.user_type === 'chief') {
+      throw new Error('User type C cannot send media');
+    }
+
+    // user validations -------------------------------------------
+
+    const user = await User.findById(receiver);
+
     if (!user?.connected) {
       throw new Error('Cannot send Question when user not connected');
     }

@@ -2,6 +2,7 @@ const DISCONNECT = 'disconnect';
 const CONNECTION = 'connection';
 const USER_ACTIVITY_UPDATE = 'user-activity-update';
 const USER_IN_BREAK = 'user-in-break';
+const USER_BREAK_VALIDATED = 'user-break-validated';
 const USER_CAME_FROM_BREAK = 'user-came-from-break';
 const CALL_FOR_HELP = 'call-for-help';
 const COUNTER_INCREMENT = 'counter-increment';
@@ -21,6 +22,7 @@ export const eventListeners = {
 export const eventEmiters = {
   CALL_FOR_HELP,
   USER_ACTIVITY_UPDATE,
+  USER_BREAK_VALIDATED,
   USER_IN_BREAK,
   USER_CAME_FROM_BREAK,
   COUNTER_INCREMENT,

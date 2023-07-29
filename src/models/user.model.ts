@@ -57,6 +57,10 @@ const userSchema: Schema<IUser> = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  need_help: {
+    type: Boolean,
+    default: false,
+  },
   last_login: {
     type: Date,
     default: () => Date.now(),

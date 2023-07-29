@@ -13,6 +13,7 @@ export interface IUser extends Document {
   onBreak: boolean;
   language: 'en' | 'ru' | 'he' | 'ar';
   last_login: Date;
+  need_help: boolean;
 }
 
 export interface IUserDocument extends IUser, Document {}

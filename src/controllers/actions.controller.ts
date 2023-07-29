@@ -4,11 +4,17 @@ import { eventEmiters } from '../socketHandlers/eventNames';
 import { User } from '../models/user.model';
 
 const emitCallForHelp = async (req: Request, res: Response) => {
-  const { id, name } = req.body;
+  const { id, name, needHelp } = req.body;
 
   try {
-    socketIo.emit(eventEmiters.CALL_FOR_HELP, { userId: id, name });
-    console.log(`[CALLED-FOR-HELP]: Name: ${name} | ID: ${id}`);
+    await User.findOneAndUpdate({ _id: id }, { need_help: needHelp });
+
+    socketIo.emit(eventEmiters.CALL_FOR_HELP, {
+      userId: id,
+      name,
+      isActive: needHelp,
+    });
+
     return res.json({});
   } catch (err) {
     return res
@@ -124,6 +130,7 @@ const getAdminDashboard = async (req: Request, res: Response) => {
           last_login: 1,
           onBreak: 1,
           connected: 1,
+          need_help: 1,
           clicks_count: { $arrayElemAt: ['$clicks.clicks_dates_length', 0] },
           breaks_count: { $arrayElemAt: ['$breaks.breaks_count', 0] },
           prev_distress_count: {

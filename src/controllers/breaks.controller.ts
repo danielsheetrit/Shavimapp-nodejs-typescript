@@ -12,6 +12,8 @@ const handleBreak = async (req: Request, res: Response) => {
 
     if (!isBreak) {
       socketIo.emit(eventEmiters.USER_CAME_FROM_BREAK, { userId: id });
+    } else {
+      socketIo.emit(eventEmiters.USER_IN_BREAK, { userId: id });
     }
 
     console.log(`[Break]: ${isBreak}`);
@@ -44,12 +46,12 @@ const validateBreak = async (req: Request, res: Response) => {
       }
 
       // Increment the break count
-      userBreak.breaks_count++;
+      userBreak.breaks_count = userBreak.breaks_count + 1;
 
       // Save the updated break count
       await userBreak.save();
 
-      socketIo.emit(eventEmiters.USER_IN_BREAK, { userId: id });
+      socketIo.emit(eventEmiters.USER_BREAK_VALIDATED, { userId: id });
     }
 
     return res.json({});

@@ -3,10 +3,10 @@ import { IClick, IClickDocument } from '../interfaces/IClick';
 
 const ClickSchema: Schema<IClick> = new Schema(
   {
-    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    clicks_dates: { type: [Date], required: true, default: [] },
-    date: { type: Date, required: true },
-    updatedAt: { type: Date, required: true },
+    user_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    created_at: { type: Date, required: true },
+    updated_at: { type: Date, required: true },
+    count: { type: Number, required: true },
   },
   { collection: 'clicks' }
 );

@@ -2,10 +2,10 @@ import { Document } from '../db/mongoose';
 import { IUser } from './IUser';
 
 export interface IClick {
-  userId: IUser['_id'];
-  clicks_dates: Date[];
-  date: Date;
-  updatedAt: Date;
+  user_id: IUser['_id'];
+  created_at: Date;
+  updated_at: Date;
+  count: number;
 }
 
 export interface IClickDocument extends IClick, Document {}

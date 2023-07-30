@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import { getClick, handleClick } from '../controllers/clicks.controller';
+import { getClicks, handleClick } from '../controllers/clicks.controller';
 
 const clicksRouter = Router();
 
-clicksRouter.get('/:id', getClick).put('/', handleClick);
+clicksRouter.get('/:id/:milli/:offset', getClicks).put('/', handleClick);
 
 export default clicksRouter;

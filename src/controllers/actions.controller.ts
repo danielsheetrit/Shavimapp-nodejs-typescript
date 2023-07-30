@@ -29,10 +29,6 @@ const getAdminDashboard = async (req: Request, res: Response) => {
   const date = new Date(milisec);
   const tommarowDate = new Date(new Date(date).setDate(date.getDate() + 1));
 
-  console.log('milisec', milisec);
-  console.log('date', date);
-  console.log('tommarowDate', tommarowDate);
-
   try {
     const users = await User.aggregate([
       {
@@ -147,8 +143,6 @@ const getAdminDashboard = async (req: Request, res: Response) => {
         },
       },
     ]);
-
-    console.log(JSON.parse(JSON.stringify(users)));
 
     return res.json(users);
   } catch (err) {

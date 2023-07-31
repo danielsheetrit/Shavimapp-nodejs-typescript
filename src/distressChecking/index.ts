@@ -3,14 +3,16 @@ import { User } from '../models/user.model';
 import { socketIo } from '../server';
 import { eventEmiters } from '../socketHandlers/eventNames';
 import { createQuestion } from '../controllers/utils.controller';
+import { getCurrentDate, getStartAndEndOfDate } from '../utils';
+import { mongoose } from '../db/mongoose';
 
 const distressCheck = async (
   sampling_cycle_in_minutes: number,
-  count_ref_per_hour: number
+  count_ref_per_hour: number,
+  offset: number,
+  milli: number
 ) => {
-  // Get the start and end of today
-  const startOfToday = new Date();
-  startOfToday.setHours(0, 0, 0, 0);
+  const { start, end } = getStartAndEndOfDate(milli, offset);
 
   const users = await User.aggregate([
     {
@@ -29,13 +31,14 @@ const distressCheck = async (
             $match: {
               $expr: {
                 $and: [
-                  { $eq: ['$userId', '$$userId'] },
-                  { $eq: ['$date', startOfToday] },
+                  { $eq: ['$user_id', '$$userId'] },
+                  { $gt: ['$created_at', start] },
+                  { $lt: ['$created_at', end] },
                 ],
               },
             },
           },
-          { $project: { clicks_dates_length: { $size: '$clicks_dates' } } },
+          { $project: { count: 1 } },
         ],
         as: 'clicks',
       },
@@ -49,8 +52,9 @@ const distressCheck = async (
             $match: {
               $expr: {
                 $and: [
-                  { $eq: ['$userId', '$$userId'] },
-                  { $eq: ['$date', startOfToday] },
+                  { $eq: ['$user_id', '$$userId'] },
+                  { $gt: ['$created_at', start] },
+                  { $lt: ['$created_at', end] },
                 ],
               },
             },
@@ -64,7 +68,7 @@ const distressCheck = async (
       $project: {
         _id: 1,
         username: 1,
-        clicks_count: { $arrayElemAt: ['$clicks.clicks_dates_length', 0] },
+        clicks_count: { $arrayElemAt: ['$clicks.count', 0] },
         prev_clicks_sample: {
           $arrayElemAt: ['$distresses.prev_clicks_sample', 0],
         },
@@ -84,11 +88,34 @@ const distressCheck = async (
     return;
   }
 
+  _actualCheck(
+    count_ref_per_hour,
+    sampling_cycle_in_minutes,
+    validUsersForCheck,
+    start,
+    end
+  );
+};
+
+type UsersToCheckType = {
+  _id: string;
+  username: string;
+  clicks_count: number;
+  prev_clicks_sample: number;
+};
+
+const _actualCheck = async (
+  sampling_cycle_in_minutes: number,
+  count_ref_per_hour: number,
+  validUsersForCheck: UsersToCheckType[],
+  startOfDay: Date,
+  endOfDay: Date
+) => {
   const expectedClicksPerCycle = Math.round(
     (count_ref_per_hour * sampling_cycle_in_minutes) / 60
   );
 
-  validUsersForCheck.forEach(async (user) => {
+  await validUsersForCheck.forEach(async (user) => {
     const UserPervDistressSampleCount = user.prev_clicks_sample || 0;
 
     const diff = user.clicks_count - UserPervDistressSampleCount;
@@ -96,29 +123,35 @@ const distressCheck = async (
     const isDistress =
       diff < expectedClicksPerCycle - expectedClicksPerCycle * 0.3;
 
-    const distressRecord = await Distress.findOne({
-      userId: user._id,
-      date: startOfToday,
-    });
+    const distressRecords = await Distress.aggregate([
+      {
+        $match: {
+          user_id: new mongoose.Types.ObjectId(user._id), // check
+          created_at: { $gt: startOfDay, $lt: endOfDay },
+        },
+      },
+    ]);
+
+    const distressRecord = distressRecords[0] || null;
 
     if (distressRecord) {
-      // must placed before re-assign distress_count
-      distressRecord.prev_distress_count = distressRecord.distress_count;
+      const { distress_count } = distressRecord;
 
-      distressRecord.distress_count = isDistress
-        ? distressRecord.distress_count + 1
-        : distressRecord.distress_count;
-
-      distressRecord.prev_clicks_sample = user.clicks_count;
-
-      await distressRecord.save();
+      await Distress.findOneAndUpdate(
+        { _id: distressRecord._id },
+        {
+          prev_distress_count: distress_count,
+          distress_count: isDistress ? distress_count + 1 : distress_count,
+          prev_clicks_sample: user.clicks_count,
+        }
+      );
     } else {
       const newUserDistress = new Distress({
-        userId: user._id,
+        user_id: user._id,
         distress_count: isDistress ? 1 : 0,
         prev_distress_count: 0,
         prev_clicks_sample: user.clicks_count,
-        date: startOfToday,
+        created_at: getCurrentDate(),
       });
       await newUserDistress.save();
     }

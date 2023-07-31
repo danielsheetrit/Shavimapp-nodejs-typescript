@@ -15,7 +15,7 @@ const handleBreak = async (req: Request, res: Response) => {
     if (!isBreak) {
       socketIo.emit(eventEmiters.USER_CAME_FROM_BREAK, { userId: id });
     } else {
-      socketIo.emit(eventEmiters.USER_IN_BREAK, { userId: id });
+      socketIo.emit(eventEmiters.USER_IN_BREAK);
     }
 
     return res.status(200).json({});

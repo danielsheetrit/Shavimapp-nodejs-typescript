@@ -3,11 +3,11 @@ import { IDistress, IDistressDocument } from '../interfaces/IDistress';
 
 const DistressSchema: Schema<IDistress> = new Schema(
   {
-    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    user_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     distress_count: { type: Number, required: true, default: 0 },
     prev_distress_count: { type: Number, required: true, default: 0 },
     prev_clicks_sample: { type: Number, required: true, default: 0 },
-    date: { type: Date, required: true, default: new Date() },
+    created_at: { type: Date, required: true, default: () => Date.now() },
   },
   { collection: 'distresses' }
 );

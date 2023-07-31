@@ -61,93 +61,94 @@ const getAdminDashboard = async (req: Request, res: Response) => {
           as: 'clicks',
         },
       },
-      // {
-      //   $lookup: {
-      //     from: 'breaks',
-      //     let: { userId: '$_id' },
-      //     pipeline: [
-      //       {
-      //         $match: {
-      //           $expr: {
-      //             $and: [
-      //               { $eq: ['$userId', '$$userId'] },
-      //               { $eq: ['$date', date] },
-      //             ],
-      //           },
-      //         },
-      //       },
-      //       { $project: { breaks_count: 1 } },
-      //     ],
-      //     as: 'breaks',
-      //   },
-      // },
-      // {
-      //   $lookup: {
-      //     from: 'distresses',
-      //     let: { userId: '$_id' },
-      //     pipeline: [
-      //       {
-      //         $match: {
-      //           $expr: {
-      //             $and: [
-      //               { $eq: ['$userId', '$$userId'] },
-      //               { $eq: ['$date', date] },
-      //             ],
-      //           },
-      //         },
-      //       },
-      //       { $project: { distress_count: 1, prev_distress_count: 1 } },
-      //     ],
-      //     as: 'distresses',
-      //   },
-      // },
-      // {
-      //   $lookup: {
-      //     from: 'questions',
-      //     let: { userId: '$_id', today: date, tommarowDate },
-      //     pipeline: [
-      //       {
-      //         $match: {
-      //           $expr: {
-      //             $and: [
-      //               { $eq: ['$receiver', '$$userId'] },
-      //               { $gte: ['$createdAt', '$$today'] },
-      //               { $lt: ['$createdAt', '$$tommarowDate'] },
-      //               { $ne: ['$answer', ''] },
-      //             ],
-      //           },
-      //         },
-      //       },
-      //       { $sort: { createdAt: -1 } },
-      //       { $limit: 1 },
-      //       { $project: { answer: 1 } },
-      //     ],
-      //     as: 'latest_answer',
-      //   },
-      // },
+      {
+        $lookup: {
+          from: 'breaks',
+          let: { userId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$user_id', '$$userId'] },
+                    { $gt: ['$created_at', start] },
+                    { $lt: ['$created_at', end] },
+                  ],
+                },
+              },
+            },
+            { $project: { count: 1 } },
+          ],
+          as: 'breaks',
+        },
+      },
+      {
+        $lookup: {
+          from: 'distresses',
+          let: { userId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$user_id', '$$userId'] },
+                    { $gt: ['$created_at', start] },
+                    { $lt: ['$created_at', end] },
+                  ],
+                },
+              },
+            },
+            { $project: { distress_count: 1, prev_distress_count: 1 } },
+          ],
+          as: 'distresses',
+        },
+      },
+      {
+        $lookup: {
+          from: 'questions',
+          let: { userId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$receiver', '$$userId'] },
+                    { $gt: ['$created_at', start] },
+                    { $lt: ['$created_at', end] },
+                    { $ne: ['$answer', ''] },
+                  ],
+                },
+              },
+            },
+            { $sort: { created_at: -1 } },
+            { $limit: 1 },
+            { $project: { answer: 1 } },
+          ],
+          as: 'latest_answer',
+        },
+      },
       {
         $project: {
           _id: 1,
           first_name: 1,
           last_name: 1,
-          // avatar: 1,
+          avatar: 1,
           last_login: 1,
           onBreak: 1,
           connected: 1,
           need_help: 1,
           clicks_count: { $arrayElemAt: ['$clicks.count', 0] },
-          // breaks_count: { $arrayElemAt: ['$breaks.breaks_count', 0] },
-          // prev_distress_count: {
-          //   $arrayElemAt: ['$distresses.prev_distress_count', 0],
-          // },
-          // distress_count: {
-          //   $arrayElemAt: ['$distresses.distress_count', 0],
-          // },
-          // latest_answer: { $arrayElemAt: ['$latest_answer.answer', 0] },
+          breaks_count: { $arrayElemAt: ['$breaks.count', 0] },
+          prev_distress_count: {
+            $arrayElemAt: ['$distresses.prev_distress_count', 0],
+          },
+          distress_count: {
+            $arrayElemAt: ['$distresses.distress_count', 0],
+          },
+          latest_answer: { $arrayElemAt: ['$latest_answer.answer', 0] },
         },
       },
     ]);
-    console.log(users);
 
     return res.json(users);
   } catch (err) {

@@ -21,7 +21,8 @@ import clicksRouter from './routes/clicks.route';
 import mediaRouter from './routes/media.route';
 
 // socket handlers
-import handleEvents from './socketHandlers/main.handler';
+import { handleConnectivity } from './socketHandlers/main.handler';
+
 import { eventListeners } from './socketHandlers/eventNames';
 import questionRouter from './routes/questions.route';
 
@@ -54,8 +55,8 @@ export const socketIo = new Server(server, {
   },
 });
 
-// events
-socketIo.on(eventListeners.CONNECTION, handleEvents);
+// events listeners
+socketIo.on(eventListeners.CONNECTION, handleConnectivity);
 
 app.use('*', (_req: Request, res: Response) => {
   res.status(404).json({ message: 'Route not found' });

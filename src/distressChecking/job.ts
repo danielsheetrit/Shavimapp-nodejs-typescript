@@ -3,7 +3,8 @@ import {
   checkConnected,
   getDistressCheckSettings,
 } from '../controllers/utils.controller';
-import { distressCheck } from './index';
+import { socketIo } from '../server';
+import { eventEmiters } from '../socketHandlers/eventNames';
 
 let distressInterval: schedual.Job | null = null;
 let inProgress = false;
@@ -19,16 +20,18 @@ const startJob = async () => {
       throw new Error('failed to fetch settings when start a job');
     }
 
-    const { sampling_cycle_in_minutes, count_ref_per_hour } = settings;
+    const { sampling_cycle_in_minutes } = settings;
 
     // 0 */${samplingCycle} * * * * cron expression. runs every X minutes.
     distressInterval = schedual.scheduleJob(
       `0 */${sampling_cycle_in_minutes} * * * *`,
       () => {
         console.log('[Start Distress Check]', Date.now());
-        distressCheck(sampling_cycle_in_minutes, count_ref_per_hour); // distress check
+        socketIo.emit(eventEmiters.NEED_DISTRESS_JOB_ARGS);
       }
     );
+
+    inProgress = false;
   };
 
   if (!distressInterval && !inProgress) {

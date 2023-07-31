@@ -12,11 +12,14 @@ const DISTRESS_SETTINGS_CHANGED = 'distress-checking-changed';
 const USER_IN_DISTRESS = 'user-in-distress';
 const QUESTION_CREATED = 'question-created';
 const QUESTION_ANSWERED = 'question-answered';
+const CLIENT_SENT_DISTRESS_JOB_ARGS = 'client-sent-distress-job-args';
+const NEED_DISTRESS_JOB_ARGS = 'need-distress-job-args';
 
 export const eventListeners = {
   DISCONNECT,
   CONNECTION,
   DISTRESS_SETTINGS_CHANGED,
+  CLIENT_SENT_DISTRESS_JOB_ARGS,
 };
 
 export const eventEmiters = {
@@ -32,4 +35,5 @@ export const eventEmiters = {
   USER_IN_DISTRESS,
   QUESTION_ANSWERED,
   QUESTION_CREATED,
+  NEED_DISTRESS_JOB_ARGS,
 };

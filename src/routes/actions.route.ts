@@ -9,7 +9,7 @@ import {
 const actionsRouter = Router();
 
 actionsRouter
-  .get('/admin-dashboard/:milisec/:workGroup', getAdminDashboard)
+  .get('/admin-dashboard/:milli/:workGroup/:offest', getAdminDashboard)
   .get('/management-dashboard', getManagementDashboard)
   .post('/help', emitCallForHelp);
 

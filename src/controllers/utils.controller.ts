@@ -2,6 +2,7 @@ import { IQuestion } from '../interfaces/IQuestion';
 import { Question } from '../models/question.model';
 import { Settings } from '../models/settings.model';
 import { User } from '../models/user.model';
+import { getCurrentDate } from '../utils';
 
 const checkConnected = async () => {
   try {
@@ -25,13 +26,13 @@ const createQuestion = async (questionBody: any) => {
   const { isSystem, sender, receiver, question_type, url, text } = questionBody;
 
   const newQuestion = {
-    isSystem,
+    is_system: isSystem,
     sender,
     receiver,
     question_type,
     url,
     text,
-    createdAt: new Date(),
+    created_at: getCurrentDate(),
     answer: '',
   };
 

@@ -5,7 +5,6 @@ const ClickSchema: Schema<IClick> = new Schema(
   {
     user_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     created_at: { type: Date, required: true },
-    updated_at: { type: Date, required: true },
     count: { type: Number, required: true },
   },
   { collection: 'clicks' }

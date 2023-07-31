@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { mongoose } from '../db/mongoose';
-import moment from 'moment-timezone';
 
 // locals
 import { User } from '../models/user.model';
@@ -28,15 +27,12 @@ const getClicks = async (req: Request, res: Response) => {
 
     const currentClick = clickRecords[0] || null;
 
-    if (!currentClick) {
-      return res.status(404).json({ message: 'Failed to find click' });
-    }
-
-    return res.json({ count: currentClick.count });
+    return res.json({ count: currentClick?.count || 0 });
   } catch (err) {
-    return res
-      .status(500)
-      .json({ message: 'Failed to handle click', error: err });
+    return res.status(500).json({
+      message: 'Failed to get click',
+      error: err.toString(),
+    });
   }
 };
 
@@ -99,7 +95,6 @@ const handleClick = async (req: Request, res: Response) => {
         { _id: currentClick._id },
         {
           count: currentClick.count + 1,
-          updated_at: currentDate,
         }
       );
     } else {
@@ -107,7 +102,6 @@ const handleClick = async (req: Request, res: Response) => {
         user_id: userId,
         count: 1,
         created_at: currentDate,
-        updated_at: currentDate,
       });
       await newClick.save();
     }
@@ -119,7 +113,7 @@ const handleClick = async (req: Request, res: Response) => {
   } catch (err) {
     return res
       .status(500)
-      .json({ message: 'Failed to handle click', error: err });
+      .json({ message: 'Failed to handle click', error: err.toString() });
   }
 };
 

@@ -17,14 +17,17 @@ const initiateQuestion = async (req: Request, res: Response) => {
     }
 
     // user validations -------------------------------------------
-
     const user = await User.findById(receiver);
 
-    if (!user?.connected) {
+    if (!user) {
+      throw new Error('User not found at initiateQuestion');
+    }
+
+    if (!user.connected) {
       throw new Error('Cannot send Question when user not connected');
     }
 
-    if (user?.onBreak) {
+    if (user.onBreak) {
       throw new Error('Cannot send Question when user on break');
     }
 

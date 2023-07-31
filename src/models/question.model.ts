@@ -11,7 +11,7 @@ const questionSchema: Schema<IQuestion> = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
-  isSystem: {
+  is_system: {
     type: Boolean,
     required: true,
   },
@@ -20,9 +20,9 @@ const questionSchema: Schema<IQuestion> = new mongoose.Schema({
     enum: ['video', 'postcard', 'feeling'],
     required: true,
   },
-  createdAt: {
+  created_at: {
     type: Date,
-    default: Date.now(),
+    default: () => Date.now(),
   },
   answer: {
     type: String,

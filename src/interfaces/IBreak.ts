@@ -2,9 +2,9 @@ import { Document } from '../db/mongoose';
 import { IUser } from './IUser';
 
 export interface IBreak extends Document {
-  userId: IUser['_id'];
-  breaks_count: number;
-  date: Date;
+  user_id: IUser['_id'];
+  count: number;
+  created_at: Date;
 }
 
 export interface IBreakDocument extends IBreak, Document {}

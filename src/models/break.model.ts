@@ -3,9 +3,9 @@ import { IBreak, IBreakDocument } from '../interfaces/IBreak';
 
 const BreakSchema: Schema<IBreak> = new Schema(
   {
-    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    breaks_count: { type: Number, required: true },
-    date: { type: Date, required: true },
+    user_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    count: { type: Number, required: true },
+    created_at: { type: Date, required: true },
   },
   { collection: 'breaks' }
 );

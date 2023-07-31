@@ -9,6 +9,8 @@ import {
 import { distressCheck } from '../distressChecking';
 import { getDistressCheckSettings } from '../controllers/utils.controller';
 
+let isSent = false;
+
 export async function handleConnectivity(socket: Socket) {
   await connectionHandlers.handleUserStatus(socket, true);
   startJob();
@@ -30,6 +32,10 @@ export async function handleConnectivity(socket: Socket) {
 }
 
 async function _handleClientDistressArgs(socket: Socket) {
+  if (isSent) return;
+
+  isSent = true;
+
   const milli = socket.data.milli;
   const offset = socket.data.offset;
 
@@ -41,5 +47,13 @@ async function _handleClientDistressArgs(socket: Socket) {
 
   const { sampling_cycle_in_minutes, count_ref_per_hour } = settings;
 
-  distressCheck(sampling_cycle_in_minutes, count_ref_per_hour, offset, milli);
+  // taking time
+  await distressCheck(
+    sampling_cycle_in_minutes,
+    count_ref_per_hour,
+    offset,
+    milli
+  );
+
+  isSent = false;
 }

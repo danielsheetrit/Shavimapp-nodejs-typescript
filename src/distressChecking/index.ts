@@ -88,7 +88,7 @@ const distressCheck = async (
     return;
   }
 
-  _actualCheck(
+  await _actualCheck(
     count_ref_per_hour,
     sampling_cycle_in_minutes,
     validUsersForCheck,

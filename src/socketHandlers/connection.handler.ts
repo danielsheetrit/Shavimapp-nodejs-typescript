@@ -19,7 +19,7 @@ async function handleUserStatus(socket: Socket, status: boolean) {
 
     if (status) {
       await User.findByIdAndUpdate(userId, {
-        last_login: new Date(),
+        last_login: Date.now(),
       });
     }
 

@@ -1,5 +1,4 @@
 import { Router } from 'express';
-
 import {
   emitCallForHelp,
   getAdminDashboard,
@@ -9,7 +8,7 @@ import {
 const actionsRouter = Router();
 
 actionsRouter
-  .get('/admin-dashboard/:milli/:workGroup/:offest', getAdminDashboard)
+  .get('/admin-dashboard', getAdminDashboard)
   .get('/management-dashboard', getManagementDashboard)
   .post('/help', emitCallForHelp);
 

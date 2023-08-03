@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { mongoose } from '../db/mongoose';
+import { DateTime } from 'luxon';
 
 // locals
 import { User } from '../models/user.model';
@@ -10,10 +11,11 @@ import { eventEmiters } from '../socketHandlers/eventNames';
 import { getCurrentDate, getStartAndEndOfDate } from '../utils';
 
 const getClicks = async (req: Request, res: Response) => {
-  const { id, offset, milli } = req.params;
+  const id = req.query.id as string;
+  const timezone = req.query.timezone as string;
+  const milli = req.query.milli as string;
 
-  const parsedOffset = parseInt(offset, 10);
-  const { start, end } = getStartAndEndOfDate(milli, parsedOffset);
+  const { start, end } = getStartAndEndOfDate(milli, timezone);
 
   try {
     const clickRecords = await Click.aggregate([
@@ -37,8 +39,9 @@ const getClicks = async (req: Request, res: Response) => {
 };
 
 const handleClick = async (req: Request, res: Response) => {
-  const { id: userId, offset, milli } = req.body;
-  const { start, end } = getStartAndEndOfDate(milli, offset);
+  const { id: userId, timezone, milli } = req.body;
+
+  const { start, end } = getStartAndEndOfDate(milli, timezone);
 
   try {
     // validate break
@@ -95,6 +98,7 @@ const handleClick = async (req: Request, res: Response) => {
         { _id: currentClick._id },
         {
           count: currentClick.count + 1,
+          updated_at: Date.now(),
         }
       );
     } else {

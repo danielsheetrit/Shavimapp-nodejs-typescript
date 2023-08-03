@@ -25,12 +25,13 @@ const emitCallForHelp = async (req: Request, res: Response) => {
 };
 
 const getAdminDashboard = async (req: Request, res: Response) => {
-  const { milli, offset, workGroup } = req.params;
+  const workGroup = req.query.workGroup as string;
+  const milli = req.query.milli as string;
+  const timezone = req.query.timezone as string;
 
-  const parsedOffest = parseInt(offset, 10);
   const parsedWorkGroup = parseInt(workGroup, 10);
 
-  const { start, end } = getStartAndEndOfDate(milli, parsedOffest);
+  const { start, end } = getStartAndEndOfDate(milli, timezone);
 
   try {
     const users = await User.aggregate([

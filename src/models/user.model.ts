@@ -62,8 +62,8 @@ const userSchema: Schema<IUser> = new mongoose.Schema({
     default: false,
   },
   last_login: {
-    type: Date,
-    default: () => Date.now(),
+    type: mongoose.Schema.Types.Mixed,
+    default: null,
   },
 });
 

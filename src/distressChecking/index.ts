@@ -9,10 +9,10 @@ import { mongoose } from '../db/mongoose';
 const distressCheck = async (
   sampling_cycle_in_minutes: number,
   count_ref_per_hour: number,
-  offset: number,
+  timezone: string,
   milli: number
 ) => {
-  const { start, end } = getStartAndEndOfDate(milli, offset);
+  const { start, end } = getStartAndEndOfDate(milli, timezone);
 
   const users = await User.aggregate([
     {
@@ -115,7 +115,7 @@ const _actualCheck = async (
     (count_ref_per_hour * sampling_cycle_in_minutes) / 60
   );
 
-  await validUsersForCheck.forEach(async (user) => {
+  validUsersForCheck.forEach(async (user) => {
     const UserPervDistressSampleCount = user.prev_clicks_sample || 0;
 
     const diff = user.clicks_count - UserPervDistressSampleCount;

@@ -3,6 +3,6 @@ import { getClicks, handleClick } from '../controllers/clicks.controller';
 
 const clicksRouter = Router();
 
-clicksRouter.get('/:id/:milli/:offset', getClicks).put('/', handleClick);
+clicksRouter.get('/', getClicks).put('/', handleClick);
 
 export default clicksRouter;

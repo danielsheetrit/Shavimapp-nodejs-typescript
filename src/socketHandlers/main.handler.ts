@@ -13,7 +13,7 @@ let isSent = false;
 
 export async function handleConnectivity(socket: Socket) {
   await connectionHandlers.handleUserStatus(socket, true);
-  startJob();
+  // startJob();
 
   socket.on(eventListeners.DISTRESS_SETTINGS_CHANGED, () => {
     restartJob();
@@ -37,7 +37,7 @@ async function _handleClientDistressArgs(socket: Socket) {
   isSent = true;
 
   const milli = socket.data.milli;
-  const offset = socket.data.offset;
+  const timezone = socket.data.timezone;
 
   const settings = await getDistressCheckSettings();
 
@@ -51,7 +51,7 @@ async function _handleClientDistressArgs(socket: Socket) {
   await distressCheck(
     sampling_cycle_in_minutes,
     count_ref_per_hour,
-    offset,
+    timezone,
     milli
   );
 

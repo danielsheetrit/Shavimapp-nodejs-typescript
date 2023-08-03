@@ -2,6 +2,7 @@ import { Socket } from 'socket.io';
 import { socketIo } from '../server';
 import { User } from '../models/user.model';
 import { eventEmiters } from './eventNames';
+import { getCurrentDate } from '../utils';
 
 async function handleUserStatus(socket: Socket, status: boolean) {
   console.log(`[${status ? 'connected' : 'disconnected'}]: ${socket.id}`);
@@ -19,7 +20,7 @@ async function handleUserStatus(socket: Socket, status: boolean) {
 
     if (status) {
       await User.findByIdAndUpdate(userId, {
-        last_login: Date.now(),
+        last_login: getCurrentDate(),
       });
     }
 

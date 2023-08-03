@@ -19,12 +19,11 @@ import settingsRouter from './routes/settings.route';
 import breaksRouter from './routes/breaks.route';
 import clicksRouter from './routes/clicks.route';
 import mediaRouter from './routes/media.route';
+import questionRouter from './routes/questions.route';
 
 // socket handlers
 import { handleConnectivity } from './socketHandlers/main.handler';
-
 import { eventListeners } from './socketHandlers/eventNames';
-import questionRouter from './routes/questions.route';
 
 const app: Application = express();
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3030;

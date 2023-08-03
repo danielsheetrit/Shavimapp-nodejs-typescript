@@ -1,5 +1,5 @@
 import { IUser } from '../interfaces/IUser';
-import moment, { Moment } from 'moment-timezone';
+import { DateTime } from 'luxon';
 
 const isEmpty = (props: string[]) => {
   return props.some((prop) => !prop || !prop.trim().length);
@@ -11,30 +11,22 @@ const formatUser = (user: IUser) => {
   return { ...formattedUser, avatar: base64Data };
 };
 
-const getStartAndEndOfDate = (
-  milli: number | string,
-  offsetMinutes: number
-) => {
-  let date: number | string | Moment = milli;
+const getStartAndEndOfDate = (milli: string | number, timzone: string) => {
+  const ms = typeof milli === 'string' ? parseInt(milli, 10) : milli;
 
-  if (typeof milli === 'string') {
-    date = moment(parseInt(milli, 10));
-  }
+  const time = DateTime.fromMillis(ms).setZone(timzone);
 
-  // Parse the date and adjust it for the timezone offset
-  const utcDate = moment(date).add(offsetMinutes, 'minutes');
+  console.log(time.toJSDate());
 
-  // Get the start and end of the day in UTC
-  const start = utcDate.clone().startOf('day').toDate();
-  const end = utcDate.clone().endOf('day').toDate();
+  const start = time.startOf('day').toJSDate();
+  const end = time.endOf('day').toJSDate();
 
   return { start, end };
 };
 
 const getCurrentDate = () => {
-  const utcMoment = moment.utc();
-  const utcDate = new Date(utcMoment.format());
-  return utcDate;
+  const now = DateTime.utc().toJSDate();
+  return now;
 };
 
 export { isEmpty, formatUser, getStartAndEndOfDate, getCurrentDate };

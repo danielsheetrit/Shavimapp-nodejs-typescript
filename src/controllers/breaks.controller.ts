@@ -27,7 +27,7 @@ const handleBreak = async (req: Request, res: Response) => {
 };
 
 const validateBreak = async (req: Request, res: Response) => {
-  const { id, offset, milli } = req.body;
+  const { id, timezone, milli } = req.body;
 
   try {
     const user = await User.findById(id);
@@ -38,7 +38,7 @@ const validateBreak = async (req: Request, res: Response) => {
         .json({ message: 'Failed to find User at validateBreak' });
     }
 
-    const { start, end } = getStartAndEndOfDate(milli, offset);
+    const { start, end } = getStartAndEndOfDate(milli, timezone);
 
     if (user.onBreak) {
       // Find a break document for this user and today's date

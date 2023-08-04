@@ -29,7 +29,11 @@ const getAdminDashboard = async (req: Request, res: Response) => {
   const milli = req.query.milli as string;
   const timezone = req.query.timezone as string;
 
+  console.log('workgroup', workGroup);
+
   const parsedWorkGroup = parseInt(workGroup, 10);
+
+  console.log('parsed work group', parsedWorkGroup);
 
   const { start, end } = getStartAndEndOfDate(milli, timezone);
 

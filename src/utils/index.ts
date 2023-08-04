@@ -16,8 +16,6 @@ const getStartAndEndOfDate = (milli: string | number, timzone: string) => {
 
   const time = DateTime.fromMillis(ms).setZone(timzone);
 
-  console.log(time.toJSDate());
-
   const start = time.startOf('day').toJSDate();
   const end = time.endOf('day').toJSDate();
 

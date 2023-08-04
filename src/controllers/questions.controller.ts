@@ -55,14 +55,15 @@ const answerQuestion = async (req: Request, res: Response) => {
   const { answer, id } = req.body;
 
   try {
-    await Question.findByIdAndUpdate(
+    const record = await Question.findByIdAndUpdate(
       { _id: id },
       {
         answer,
-      }
+      },
+      { new: true }
     );
 
-    socketIo.emit(eventEmiters.QUESTION_ANSWERED);
+    socketIo.emit(eventEmiters.QUESTION_ANSWERED, { userId: record?.receiver });
     res.json({});
   } catch (err) {
     return res
